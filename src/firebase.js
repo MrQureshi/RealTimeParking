@@ -10,6 +10,8 @@ const config ={
 }
 
 export const firebaseApp = firebase.initializeApp(config);
-export const ParkingLocationRef = firebase.database().ref('addParkingLocation');
+export const ParkingLocationRef = firebase.database().ref('ParkingLocation');
+
+
 
 

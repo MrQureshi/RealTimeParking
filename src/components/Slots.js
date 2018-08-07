@@ -12,9 +12,10 @@ import { FormControl } from '@material-ui/core';
 import MenuItem from '@material-ui/core/MenuItem';
 import firebase from 'firebase';
 
+
 import { connect } from 'react-redux'
 
-import { parkingLocation } from '../actions';
+// import { parkingLocation } from '../actions';
 
 const styles = {
     dialogWidth: {
@@ -27,59 +28,67 @@ class Slots extends Component {
         super();
         this.state = {
             open: false,
+            index: 0,
             slot: 1,
-            // Time: 'Select',
+            Time: null,
             controlledDate: null,
-            // toggleSlots: false,
 
             value: 0,
             time: 1,
             hours: 1,
-            hoursValue: 0,
+            hoursValue: 1,
         };
     }
 
-    componentWillMount() {
-        var today = new Date();
-        var dd = today.getDate();
-        var mm = today.getMonth() + 1; //January is 0!
 
-        var yyyy = today.getFullYear();
+    componentWillMount() {
+        let today = new Date();
+        let dd = today.getDate();
+        let mm = today.getMonth() + 1; //January is 0!
+        let hh = today.getHours();
+        let min = today.getMinutes();
+
+        let yyyy = today.getFullYear();
         if (dd < 10) {
             dd = '0' + dd;
         }
         if (mm < 10) {
             mm = '0' + mm;
         }
-        var current = yyyy + '-' + mm + '-' + dd;
+        if (hh < 10) {
+            hh = '0' + hh
+        }
+        if (min < 10) {
+            min = '0' + min
+        }
+        let current = yyyy + '-' + mm + '-' + dd;
         // console.log("mount", current);
-        this.setState({ controlledDate: current })
+        let currnetTime = hh + ':' + min;
+        console.log("currnetTime", currnetTime)
+
+        this.setState({ controlledDate: current, Time: currnetTime })
+    }
+
+    handelDate = (event) => {
+        this.setState({ controlledDate: event.target.value })
+        // console.log("Done");
 
     }
 
+    handelTimePicker = (event) => {
 
-    handelDate = (event) => {
-        console.log("Done");
-        let splited = event.target.value.split("-");
-        let selected = new Date(splited[0], (splited[1] - 1), splited[2]).getTime();
-        console.log(new Date(selected))
-        if (selected > (new Date().getTime())) {
-            this.setState({ controlledDate: event.target.value })
-        }
-        else {
-            alert("Select proper date")
-        }
-        console.log(event.target.value)
+        // console.log("getTimePicker");
+        this.setState({ Time: event.target.value })
+
+
     }
 
     handleTime = (event) => {
         this.setState({ value: event.target.value });
-
     };
 
     hoursHours = event => {
         this.setState({ hoursValue: event.target.value });
-
     };
 
     handletoggle = (slot) => {
@@ -90,21 +99,57 @@ class Slots extends Component {
     }
 
     bookingSlot() {
-        const {email, location, key} = this.props.bookSlots;
-        firebase.database().ref(`addParkingLocation/${key}/slots/${this.state.slot-1}`).update({booking: true})
-        console.log("slot", this.state.slot)
-        console.log("AA",this.props.bookSlots)
-        console.log("BB", email, location)
+        let validDate = null
+        let validTime = null
 
-        const { controlledDate, value, hoursValue } = this.state;
-        console.log("Clicked", controlledDate, value, hoursValue);
-        console.log("index", );
-        
+        console.log("validDate, validTime", validDate, validTime)
+
+        const { email, location, key } = this.props.bookSlots;
+        const { controlledDate, hoursValue, Time } = this.state;
+
+        ///validat Date
+        console.log("validat Date", this.state.controlledDate)
+        let splited = this.state.controlledDate.split("-");
+        let timeSelected = this.state.Time.split(":");
+        let selectedHour = timeSelected[0];
+        let selectedMints = timeSelected[1]
+
+        console.log("array", splited)
+        let selected = new Date(Number(splited[0]), (Number(splited[1]) - 1), Number(splited[2]), selectedHour, selectedMints);
+        var startTime = selected.getHours();
+        console.log("startTime", selected);
+
+        selected = selected.getTime()
+        console.log("afdf", new Date().getTime(), selected, selected >= (new Date().getTime()), startTime)
+        if (selected >= (new Date().getTime())) {
+            validDate = this.state.controlledDate
+            validTime = this.state.Time
+        }
+        else {
+            alert("Select proper date and time ")
+        }
+        //------
+
+        selectedHour = Number(selectedHour) + Number(hoursValue);
+        let endTime = new Date(Number(splited[0]), (Number(splited[1]) - 1), Number(splited[2]), selectedHour, Number(selectedMints), );
+
+        console.log("endTime", endTime);
+
+        // console.log("Date", controlledDate)
+        // console.log("Time", Time);
+        // console.log("hoursValue", hoursValue);
 
 
 
-        // console.log("controlledDate", this.state.controlledDate);
+        // console.log("index", );
+        // let Date = controlledDate;
+        // let slotNumber = this.state.slot;
+        // firebase.database().ref(`ParkingLocation/${key}/slots/${this.state.slot - 1}`).update({ booking: true })
 
+        // // firebase.database().ref(`/bookings/${key}/${index}/`).push({email, location});
+        // firebase.database().ref('Booking').push({ email, location, key, slotNumber, Date, value, hoursValue });
+
+        // this.handletoggle();
     }
     // click = (index) => {
     //     console.log("click", this.state.controlledDate);
@@ -116,24 +161,26 @@ class Slots extends Component {
     //     })
     // }
     render() {
-        const { open, controlledDate, value, hoursValue } = this.state;
-        console.log("render", this.props.bookSlots)
+        const { open, controlledDate, value, hoursValue, } = this.state;
+        // console.log("render", validDate, validTime)
         return (
             <Fragment>
                 {
                     //console.log("Slots + bookSlots", this.props.bookSlots.slots)
-                   
+
                     this.props.bookSlots.slots && this.props.bookSlots.slots.map((slt, index) => {
-                    // console.log(this.props.bookSlots.slots)
-                        return <Button onClick={() => { this.handletoggle(index + 1); 
+                        // console.log(this.props.bookSlots.slots)
+                        return <Button onClick={() => {
+                            this.handletoggle(index + 1);
+                            this.setState({ index: index + 1 });
                             // this.click(index)
-                         }} style={{ margin: 10 }} variant="contained" color={slt.booking ? 'secondary' : "primary"}  key={index}>slot {index + 1}</Button>
-                })
+                        }} style={{ margin: 10 }} variant="contained" color={slt.booking ? 'secondary' : "primary"} key={index}>slot {index + 1}</Button>
+                    })
                 }
                 <Dialog
                     open={open}
                     onClose={this.handletoggle} >
-                    <DialogTitle>Book your Slot</DialogTitle>
+                    <DialogTitle>Book Slot {this.state.index}</DialogTitle>
                     <DialogContent style={styles.dialogWidth}>
                         <FormControl fullWidth >
                             <Typography>
@@ -145,10 +192,21 @@ class Slots extends Component {
                                 // defaultValue={this.state.controlledDate}
                                 value={this.state.controlledDate}
                                 onChange={this.handelDate}
-
                                 fullWidth
                             />
                             <br />
+                            <Typography>
+                                Time
+                            </Typography>
+                            <TextField
+                                type="time"
+                                // defaultValue="07:02"
+                                value={this.state.Time}
+                                onChange={this.handelTimePicker}
+                                fullWidth
+                            />
+                            <br />
+                            {/* 
                             <Typography>
                                 Time
                             </Typography>
@@ -182,19 +240,20 @@ class Slots extends Component {
                                 <MenuItem value={"09:00 PM"} >09:00 PM</MenuItem>
                                 <MenuItem value={"11:00 PM"} >11:00 PM</MenuItem>
                             </Select>
-                            <br />
+                            <br /> */}
                             <Typography>
                                 Hours
                             </Typography>
                             <Select
                                 value={this.state.hoursValue} onChange={this.hoursHours}
                             >
-                                <MenuItem value={0} >Select</MenuItem>
-                                <MenuItem value={"1 hours"}>1 hours</MenuItem>
-                                <MenuItem value={"2 hours"}>2 hours</MenuItem>
-                                <MenuItem value={"3 hours"}>3 hours</MenuItem>
+                                {/* <MenuItem value={0} >Select</MenuItem> */}
+                                <MenuItem value={1}>1 hours</MenuItem>
+                                <MenuItem value={2}>2 hours</MenuItem>
+                                <MenuItem value={3}>3 hours</MenuItem>
                             </Select>
                             <br />
+
                             <Button
                                 variant="raised"
                                 color="primary"
@@ -212,6 +271,7 @@ class Slots extends Component {
 
 function mapStateToProps(state) {
     const { bookSlots } = state;
+    console.log("alotsssssssssss", bookSlots)
     return {
         bookSlots
     }

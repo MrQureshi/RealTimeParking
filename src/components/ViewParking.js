@@ -16,7 +16,7 @@ import IconButton from '@material-ui/core/IconButton';
 import { Typography } from '@material-ui/core';
 import Divider from '@material-ui/core/Divider';
 
-import { ParkingLocationRef } from '../firebase';
+import { ParkingLocationRef, } from '../firebase';
 
 import { parkingLocation, bookingSlots } from '../actions';
 import { connect } from 'react-redux';
@@ -53,7 +53,7 @@ class ViewParking extends Component {
 
     DeletedLocation(key) {
         // console.log("kk", key);
-        firebase.database().ref(`addParkingLocation/${key}`).remove();
+        firebase.database().ref(`ParkingLocation/${key}`).remove();
         // this.state.slots= []
     }
     clickView(bookSlots){
@@ -63,7 +63,8 @@ class ViewParking extends Component {
     }
 
     componentDidMount() {
-        ParkingLocationRef.on('value', snap => {
+        firebase.database().ref('ParkingLocation').on('value', snap => {
+            console.log("hghhgv")
             let objParkLocation = snap.val();
             let p_Lists = [];
 
@@ -124,9 +125,10 @@ class ViewParking extends Component {
 
 function mapStateToProps(state) {
     const { p_Lists } = state;
-    // console.log("state in ViewParking.jsx", state)
+    console.log("state in ViewParking.jsx", state)
     return {
-        p_Lists
+        p_Lists,
+        abc:p_Lists&&p_Lists.length
     }
 }
 
