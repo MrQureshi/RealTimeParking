@@ -23,7 +23,7 @@ firebaseApp.auth().onAuthStateChanged(user => {
         // console.log("user has signed in or up", user);
         const { email } = user;
         store.dispatch(logUser(email));
-        history.push('/');
+        history.push('/')
     } else {
         // console.log("user has signed out or still needs to sign in.")
         history.push('/signin');

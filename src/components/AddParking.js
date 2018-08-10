@@ -6,7 +6,6 @@ import { FormControl } from '@material-ui/core';
 import {ParkingLocationRef} from '../firebase'; 
 
 import { connect } from 'react-redux'
-
 const styles = {
     flex: {
         flex: 1,
@@ -34,7 +33,7 @@ class AddParking extends Component {
         }
     }
     addParkLocation(){
-        console.log("this.state", this.state);
+        // console.log("this.state", this.state);
         const {location, numbersSolts} = this.state;
         const{ email} = this.props.user;
         if(numbersSolts){
@@ -48,6 +47,7 @@ class AddParking extends Component {
         }
     }   
     render() {
+        // console.log("render Addparking : ", this.props.user)
         return (
             <Grid container>
             <Grid style={styles.flex} item xs={8}>
@@ -83,10 +83,10 @@ class AddParking extends Component {
     }
 }
 function mapStateToProps(state){
-    const {user, } = state;
+    const {user, bookingList } = state;
     // console.log("state in Addparking.jsx", state)
     return{
-        user
+        user, 
     };
 }
 

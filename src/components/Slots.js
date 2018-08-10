@@ -26,21 +26,39 @@ const styles = {
 class Slots extends Component {
     constructor() {
         super();
+
         this.state = {
             open: false,
             index: 0,
             slot: 1,
             Time: null,
             controlledDate: null,
-
+            error: null,
             value: 0,
             time: 1,
             hours: 1,
             hoursValue: 1,
+            slots: [],
+            validDate: null,
+            validTime: null,
+            bool: false,
+            bookingsList: []
+
         };
     }
 
+    componentDidMount() {
+        firebase.database().ref('Booking').on('value', snap => {
+            let objBookings = snap.val()
+            // console.log("bookings componentDidMount", objBookings)
 
+            let bookingList = [];
+            for (let key in objBookings) {
+                bookingList.push({ ...objBookings[key], key });
+            }
+            this.setState({ bookingsList: bookingList })
+        })
+    }
     componentWillMount() {
         let today = new Date();
         let dd = today.getDate();
@@ -64,15 +82,20 @@ class Slots extends Component {
         let current = yyyy + '-' + mm + '-' + dd;
         // console.log("mount", current);
         let currnetTime = hh + ':' + min;
-        console.log("currnetTime", currnetTime)
+        // console.log("currnetTime", currnetTime)
 
         this.setState({ controlledDate: current, Time: currnetTime })
+    }
+    componentWillReceiveProps(props) {
+        if (props.bookSlots.hasOwnProperty('slots')) {
+            // console.log(props.bookSlots.slots)
+            this.setState({ slots: props.bookSlots.slots, bool: true });
+        }
     }
 
     handelDate = (event) => {
         this.setState({ controlledDate: event.target.value })
         // console.log("Done");
-
     }
 
     handelTimePicker = (event) => {
@@ -94,62 +117,124 @@ class Slots extends Component {
     handletoggle = (slot) => {
         this.setState({
             open: !this.state.open,
-            slot
+            slot,
+            error: null
         })
     }
 
     bookingSlot() {
+        const { email, location, key } = this.props.bookSlots;
+        const { hoursValue, controlledDate, Time, } = this.state;
+
+        this.state.bookingsList
+
         let validDate = null
         let validTime = null
 
-        console.log("validDate, validTime", validDate, validTime)
 
-        const { email, location, key } = this.props.bookSlots;
-        const { controlledDate, hoursValue, Time } = this.state;
 
-        ///validat Date
-        console.log("validat Date", this.state.controlledDate)
+
         let splited = this.state.controlledDate.split("-");
         let timeSelected = this.state.Time.split(":");
         let selectedHour = timeSelected[0];
         let selectedMints = timeSelected[1]
 
-        console.log("array", splited)
+        // console.log("array", splited)
         let selected = new Date(Number(splited[0]), (Number(splited[1]) - 1), Number(splited[2]), selectedHour, selectedMints);
-        var startTime = selected.getHours();
-        console.log("startTime", selected);
+        var getHoursfromSelected = selected.getHours();
 
         selected = selected.getTime()
-        console.log("afdf", new Date().getTime(), selected, selected >= (new Date().getTime()), startTime)
         if (selected >= (new Date().getTime())) {
-            validDate = this.state.controlledDate
-            validTime = this.state.Time
+            // console.log("if controlledDate and Time", controlledDate, Time)
+
+            validDate = controlledDate,
+                validTime = Time
+
+            this.setState({ error: " " })
         }
         else {
-            alert("Select proper date and time ")
+            this.setState({ error: "Select proper date and time" })
+            // alert("Select proper date and time");
+            return;
         }
+        // console.log("validDate, validTime", validDate, validTime)
         //------
-
         selectedHour = Number(selectedHour) + Number(hoursValue);
         let endTime = new Date(Number(splited[0]), (Number(splited[1]) - 1), Number(splited[2]), selectedHour, Number(selectedMints), );
+        endTime = endTime.getTime()
 
-        console.log("endTime", endTime);
+        // console.log("selected", selected);
+        let startTime = selected
+        // console.log("startTime", startTime);
+        // console.log("endTime", endTime);
+        let slotNumber = this.state.slot;
+        /////validate to booking button
+        // console.log("masmlk?>?>?>?>>?", this.state.bookingsList)
+        
+        let lastBookedListEndTime;
+        if(this.state.bookingsList.length){
+            lastBookedListEndTime = this.state.bookingsList[this.state.bookingsList.length -1].endTime;
+        } 
 
-        // console.log("Date", controlledDate)
-        // console.log("Time", Time);
-        // console.log("hoursValue", hoursValue);
+        let date = new Date(lastBookedListEndTime);
+        let hh = date.getHours();
+        let mm = date.getMinutes();
+        var amPM = (hh > 11) ? "PM" : "AM";
+        if(hh > 12) {
+            hh -= 12;
+        } else if(hh == 0) {
+            hh = "12";
+        }
+        if(mm < 10) {
+            mm = "0" + mm;
+        }
+        let lastTime = hh+":"+ mm +" "+ amPM;
 
+        // console.log("lastTime", lastTime)
+    
+        // console.log("lastBookedListEndTime", lastBookedListEndTime)
 
+        let bool = false;
+        // console.log("BookedEndTime out of map", BookedEndTime)
+        this.state.bookingsList.map((bList, index) => {
+            // let BookedEndTime = []
+            let BookedEndTime = bList.endTime;
+            let BookedStartTime = bList.startTime;
+            
+            console.log("BookedStartTime", BookedStartTime)
 
-        // console.log("index", );
-        // let Date = controlledDate;
-        // let slotNumber = this.state.slot;
-        // firebase.database().ref(`ParkingLocation/${key}/slots/${this.state.slot - 1}`).update({ booking: true })
+            // console.log("BookedEndTime", BookedEndTime)
+            // console.log("location", location)
+            // console.log("Bookedlocation", bList.location)
+            // console.log("slotNumber", slotNumber)
+            // console.log("BookedslotNumber", bList.slotNumber)
 
-        // // firebase.database().ref(`/bookings/${key}/${index}/`).push({email, location});
-        // firebase.database().ref('Booking').push({ email, location, key, slotNumber, Date, value, hoursValue });
+            let currentTime = new Date().getTime();
+            // if (location === bList.location && slotNumber === bList.slotNumber && BookedEndTime > currentTime && BookedEndTime > startTime) {
+            if (location === bList.location && slotNumber === bList.slotNumber && BookedEndTime > currentTime && endTime > BookedStartTime  && BookedEndTime > startTime  ) {
+                bool = true;    
+            }
+        })
+        if(bool){
+            this.setState({ error: "this Slot is already reserved till "+ lastTime  });            
+        }else {
+            // console.log("inserted")
+            firebase.database().ref('Booking').push({
+                email, location, key, slotNumber, date: validDate, time: validTime, bookingHours: hoursValue, startTime, endTime
+            }).then(() => {
+                firebase.database().ref(`ParkingLocation/${key}/slots/${this.state.slot - 1}`).update({ booking: true }).then(() => {
+                    console.log("this.props.bookingSlot", this.props.bookSlots.slots)
+                    this.state.slots[slotNumber - 1].booking = true;
+                    this.setState(this.state);
+                    this.handletoggle();
+                })
+            }).catch(error => {
+                this.setState(error)
+            });
 
-        // this.handletoggle();
+        }
+        //__________
+        // }
     }
     // click = (index) => {
     //     console.log("click", this.state.controlledDate);
@@ -157,36 +242,46 @@ class Slots extends Component {
     //     console.log("1", index)
     //     console.log("2", this.props.bookSlots)
     //     this.props.bookSlots((key) => {
-    //         console.log("click", key)
+            // console.log("click", key)
     //     })
     // }
     render() {
-        const { open, controlledDate, value, hoursValue, } = this.state;
-        // console.log("render", validDate, validTime)
+        const { open, error } = this.state;
+        // console.log("zxzxzx this.state.bookingsList", this.state.bookingsList)
+        // console.log("render zxzxzx", this.props.bookSlots.location)
         return (
             <Fragment>
+                <Typography variant="display2" gutterBottom align="center">
+                    {
+                        this.props.bookSlots.location
+                    }
+                </Typography>
                 {
                     //console.log("Slots + bookSlots", this.props.bookSlots.slots)
+                    this.state.bool ? this.state.slots.map((slt, index) => {
 
-                    this.props.bookSlots.slots && this.props.bookSlots.slots.map((slt, index) => {
-                        // console.log(this.props.bookSlots.slots)
                         return <Button onClick={() => {
                             this.handletoggle(index + 1);
                             this.setState({ index: index + 1 });
                             // this.click(index)
                         }} style={{ margin: 10 }} variant="contained" color={slt.booking ? 'secondary' : "primary"} key={index}>slot {index + 1}</Button>
-                    })
+
+                    }) : null
                 }
                 <Dialog
                     open={open}
                     onClose={this.handletoggle} >
-                    <DialogTitle>Book Slot {this.state.index}</DialogTitle>
+                    <DialogTitle >
+                        <Typography align="center"
+                            // variant="headline" 
+                            color="primary">
+                            Slot {this.state.index}
+                        </Typography></DialogTitle>
                     <DialogContent style={styles.dialogWidth}>
                         <FormControl fullWidth >
                             <Typography>
                                 Date
                             </Typography>
-
                             <TextField
                                 type="date"
                                 // defaultValue={this.state.controlledDate}
@@ -206,41 +301,6 @@ class Slots extends Component {
                                 fullWidth
                             />
                             <br />
-                            {/* 
-                            <Typography>
-                                Time
-                            </Typography>
-                            <Select
-                                value={this.state.value} onChange={this.handleTime}
-                            >
-                                <MenuItem value={0} >Select</MenuItem>
-                                <MenuItem value={"12:00 AM"} >12:00 AM</MenuItem>
-                                <MenuItem value={"01:00 AM"} >01:00 AM</MenuItem>
-                                <MenuItem value={"02:00 AM"} >02:00 AM</MenuItem>
-                                <MenuItem value={"02:00 AM"} >02:00 AM</MenuItem>
-                                <MenuItem value={"03:00 AM"} >03:00 AM</MenuItem>
-                                <MenuItem value={"04:00 AM"} >04:00 AM</MenuItem>
-                                <MenuItem value={"05:00 AM"} >05:00 AM</MenuItem>
-                                <MenuItem value={"06:00 AM"} >06:00 AM</MenuItem>
-                                <MenuItem value={"07:00 AM"} >07:00 AM</MenuItem>
-                                <MenuItem value={"08:00 AM"} >08:00 AM</MenuItem>
-                                <MenuItem value={"09:00 AM"} >09:00 AM</MenuItem>
-                                <MenuItem value={"10:00 AM"} >10:00 AM</MenuItem>
-                                <MenuItem value={"11:00 AM"} >11:00 AM</MenuItem>
-                                <MenuItem value={"12:00 PM"} >12:00 PM</MenuItem>
-                                <MenuItem value={"01:00 PM"} >01:00 PM</MenuItem>
-                                <MenuItem value={"02:00 PM"} >02:00 PM</MenuItem>
-                                <MenuItem value={"03:00 PM"} >03:00 PM</MenuItem>
-                                <MenuItem value={"04:00 PM"} >04:00 PM</MenuItem>
-                                <MenuItem value={"05:00 PM"} >05:00 PM</MenuItem>
-                                <MenuItem value={"06:00 PM"} >06:00 PM</MenuItem>
-                                <MenuItem value={"07:00 PM"} >07:00 PM</MenuItem>
-                                <MenuItem value={"10:00 PM"} >10:00 PM</MenuItem>
-                                <MenuItem value={"08:00 PM"} >08:00 PM</MenuItem>
-                                <MenuItem value={"09:00 PM"} >09:00 PM</MenuItem>
-                                <MenuItem value={"11:00 PM"} >11:00 PM</MenuItem>
-                            </Select>
-                            <br /> */}
                             <Typography>
                                 Hours
                             </Typography>
@@ -252,6 +312,10 @@ class Slots extends Component {
                                 <MenuItem value={2}>2 hours</MenuItem>
                                 <MenuItem value={3}>3 hours</MenuItem>
                             </Select>
+                            <br />
+                            <Typography align="center" variant="subheading" color="error">
+                                {error}
+                            </Typography>
                             <br />
 
                             <Button
@@ -271,9 +335,11 @@ class Slots extends Component {
 
 function mapStateToProps(state) {
     const { bookSlots } = state;
-    console.log("alotsssssssssss", bookSlots)
+    // console.log("mapStateToProps Slots.js ", bookSlots)
     return {
-        bookSlots
+
+        bookSlots,
+
     }
 }
 

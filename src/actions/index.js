@@ -1,4 +1,4 @@
-import { SIGNED_IN, PARKING_LOCATION, BOOKING_SLOTS } from '../constants';
+import { SIGNED_IN, PARKING_LOCATION, BOOKING_SLOTS, BOOKINGS_LIST } from '../constants';
 
 export function logUser(email){
     const action ={
@@ -22,6 +22,14 @@ export function bookingSlots(bookSlots){
     const action={
         type: BOOKING_SLOTS,
         bookSlots
+    }
+    return action;
+}
+export function bookingsLists(bookingList){
+    console.log("bookingsLists", bookingList)
+    const action={
+        type: BOOKINGS_LIST,
+        bookingList
     }
     return action;
 }

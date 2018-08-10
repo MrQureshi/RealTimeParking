@@ -7,6 +7,8 @@ import { firebaseApp    } from '../firebase'
 
 import Addparking from './AddParking'
 import ViewParking from './ViewParking'
+import ViewBooking from './ViewBooking'
+import ViewUser from './ViewUsers'
 
 const styles = {
     root: {
@@ -95,8 +97,10 @@ class Dashboard extends Component {
                     <Grid item xs={12}>
                         {/* <Paper style={styles.paper} > */}
                             {this.state.value === 0 ? <Addparking/> : null}
-                            {this.state.value === 1 ? <ViewParking/> : null} 
-                        
+                            {this.state.value === 1 ? <ViewParking/> : null}
+                            {this.state.value === 2 ? <ViewBooking/> : null}
+                            {this.state.value === 3 ? <ViewUser/> : null}
+                            
                         {/* </Paper> */}
                     </Grid>
                     {/* <Grid item xs={8}>

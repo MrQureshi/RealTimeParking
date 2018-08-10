@@ -60,8 +60,11 @@ class Form extends Component {
     }
     signUp() {
         console.log('this.state', this.state)
-        const { email, password } = this.state;
+        const { userName, email, password } = this.state;
         firebaseApp.auth().createUserWithEmailAndPassword(email, password)
+            // .then(authUser => {
+            //     database.cre
+            // })
             .catch(error => {
                 this.setState({ error })
             })
@@ -87,7 +90,7 @@ class Form extends Component {
                         margin="normal"
                         onChange={event => this.setState({ password: event.target.value })}
                         type="password"
-                    /><br/>
+                    /><br />
                     <Button
                         // type="submit"
                         color="primary"
