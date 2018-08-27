@@ -12,10 +12,8 @@ import { FormControl } from '@material-ui/core';
 import MenuItem from '@material-ui/core/MenuItem';
 import firebase from 'firebase';
 
-
 import { connect } from 'react-redux'
 
-// import { parkingLocation } from '../actions';
 
 const styles = {
     dialogWidth: {
@@ -110,7 +108,7 @@ class Slots extends Component {
         this.setState({ value: event.target.value });
     };
 
-    hoursHours = event => {
+    handleHours = event => {
         this.setState({ hoursValue: event.target.value });
     };
 
@@ -123,16 +121,14 @@ class Slots extends Component {
     }
 
     bookingSlot() {
-        const { email, location, key } = this.props.bookSlots;
+        const { email } = this.props.user;
+        const { location, key } = this.props.bookSlots;
         const { hoursValue, controlledDate, Time, } = this.state;
 
         this.state.bookingsList
 
         let validDate = null
         let validTime = null
-
-
-
 
         let splited = this.state.controlledDate.split("-");
         let timeSelected = this.state.Time.split(":");
@@ -149,7 +145,6 @@ class Slots extends Component {
 
             validDate = controlledDate,
                 validTime = Time
-
             this.setState({ error: " " })
         }
         else {
@@ -170,28 +165,28 @@ class Slots extends Component {
         let slotNumber = this.state.slot;
         /////validate to booking button
         // console.log("masmlk?>?>?>?>>?", this.state.bookingsList)
-        
+        ////last time
         let lastBookedListEndTime;
-        if(this.state.bookingsList.length){
-            lastBookedListEndTime = this.state.bookingsList[this.state.bookingsList.length -1].endTime;
-        } 
+        if (this.state.bookingsList.length) {
+            lastBookedListEndTime = this.state.bookingsList[this.state.bookingsList.length - 1].endTime;
+        }
 
         let date = new Date(lastBookedListEndTime);
         let hh = date.getHours();
         let mm = date.getMinutes();
         var amPM = (hh > 11) ? "PM" : "AM";
-        if(hh > 12) {
+        if (hh > 12) {
             hh -= 12;
-        } else if(hh == 0) {
+        } else if (hh == 0) {
             hh = "12";
         }
-        if(mm < 10) {
+        if (mm < 10) {
             mm = "0" + mm;
         }
-        let lastTime = hh+":"+ mm +" "+ amPM;
+        let lastTime = hh + ":" + mm + " " + amPM;
 
         // console.log("lastTime", lastTime)
-    
+
         // console.log("lastBookedListEndTime", lastBookedListEndTime)
 
         let bool = false;
@@ -200,7 +195,7 @@ class Slots extends Component {
             // let BookedEndTime = []
             let BookedEndTime = bList.endTime;
             let BookedStartTime = bList.startTime;
-            
+
             console.log("BookedStartTime", BookedStartTime)
 
             // console.log("BookedEndTime", BookedEndTime)
@@ -211,13 +206,15 @@ class Slots extends Component {
 
             let currentTime = new Date().getTime();
             // if (location === bList.location && slotNumber === bList.slotNumber && BookedEndTime > currentTime && BookedEndTime > startTime) {
-            if (location === bList.location && slotNumber === bList.slotNumber && BookedEndTime > currentTime && endTime > BookedStartTime  && BookedEndTime > startTime  ) {
-                bool = true;    
+            if (location === bList.location && slotNumber === bList.slotNumber && BookedEndTime > currentTime && endTime > BookedStartTime && BookedEndTime > startTime) {
+                bool = true;
             }
         })
-        if(bool){
-            this.setState({ error: "this Slot is already reserved till "+ lastTime  });            
-        }else {
+        if (bool) {
+            // this.setState({ error: "this Slot is already reserved till " + lastTime });
+
+            this.setState({ error: "this Slot is already reserved" });
+        } else {
             // console.log("inserted")
             firebase.database().ref('Booking').push({
                 email, location, key, slotNumber, date: validDate, time: validTime, bookingHours: hoursValue, startTime, endTime
@@ -231,7 +228,6 @@ class Slots extends Component {
             }).catch(error => {
                 this.setState(error)
             });
-
         }
         //__________
         // }
@@ -242,10 +238,11 @@ class Slots extends Component {
     //     console.log("1", index)
     //     console.log("2", this.props.bookSlots)
     //     this.props.bookSlots((key) => {
-            // console.log("click", key)
+    // console.log("click", key)
     //     })
     // }
     render() {
+        // console.log("Render___this.props.user.email", this.props.user )
         const { open, error } = this.state;
         // console.log("zxzxzx this.state.bookingsList", this.state.bookingsList)
         // console.log("render zxzxzx", this.props.bookSlots.location)
@@ -261,7 +258,7 @@ class Slots extends Component {
                     this.state.bool ? this.state.slots.map((slt, index) => {
 
                         return <Button onClick={() => {
-                            this.handletoggle(index + 1);
+                            // this.handletoggle(index + 1);
                             this.setState({ index: index + 1 });
                             // this.click(index)
                         }} style={{ margin: 10 }} variant="contained" color={slt.booking ? 'secondary' : "primary"} key={index}>slot {index + 1}</Button>
@@ -273,10 +270,12 @@ class Slots extends Component {
                     onClose={this.handletoggle} >
                     <DialogTitle >
                         <Typography align="center"
-                            // variant="headline" 
+                            variant="headline"
+                            component="p"
                             color="primary">
                             Slot {this.state.index}
-                        </Typography></DialogTitle>
+                        </Typography>
+                    </DialogTitle>
                     <DialogContent style={styles.dialogWidth}>
                         <FormControl fullWidth >
                             <Typography>
@@ -305,7 +304,7 @@ class Slots extends Component {
                                 Hours
                             </Typography>
                             <Select
-                                value={this.state.hoursValue} onChange={this.hoursHours}
+                                value={this.state.hoursValue} onChange={this.handleHours}
                             >
                                 {/* <MenuItem value={0} >Select</MenuItem> */}
                                 <MenuItem value={1}>1 hours</MenuItem>
@@ -334,12 +333,11 @@ class Slots extends Component {
 }
 
 function mapStateToProps(state) {
-    const { bookSlots } = state;
-    // console.log("mapStateToProps Slots.js ", bookSlots)
+    const { bookSlots, user } = state;
+    // console.log("mapStateToProps Slots.js ", bookSlots, user)
     return {
-
         bookSlots,
-
+        user
     }
 }
 

@@ -22,7 +22,6 @@ const styles = {
         // height: 350,
         // overflowY: 'auto',
     },
-
 };
 const Signin = () =>
     <Fragment>
@@ -49,7 +48,7 @@ class Form extends Component {
         super(props);
 
         this.state = {
-            userName: '',
+           
             email: '',
             password: '',
             error:{

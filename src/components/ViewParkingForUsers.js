@@ -5,7 +5,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 // import ListSubheader from '@material-ui/core/ListSubheader';
-import DeleteIcon from '@material-ui/icons/Delete';
+// import DeleteIcon from '@material-ui/icons/Delete';
 import ViewIcon from '@material-ui/icons/Visibility';
 import firebase from 'firebase';
 
@@ -50,29 +50,21 @@ class ViewParking extends Component {
         }
     }
 
-    DeletedLocation(bookSlots) {
-        // console.log("kk", key);
-        firebase.database().ref(`ParkingLocation/${bookSlots.key}`).remove();
-        // console.log("this.props.bookingSlots(bookSlots)", this.props.bookingSlots(bookSlots));
-        // delete this.props.bookingSlots(bookSlots);
-        // // console.log('chal rha hai')
-        // // window.location.reload();
-        // // this.state.slots= []
-        // return this.props.bookingSlots
-    }
     clickView(bookSlots) {
         this.props.bookingSlots(bookSlots);
         // console.log("clickView?????", this.props.bookingSlots(bookSlots));
         let bKey = bookSlots.key;
         let slotLocation = bookSlots.location;
         // console.log("slotLocation??????????", slotLocation)
+
         let Check = this.state.bookingsList;
-        //console.log("Check", Check)
+        // console.log("Check", Check)
         Check.map((blist, index) => {
             // console.log("blist.location!!!!!!" ,blist.location)
             let endTime = []
             endTime.push(blist.endTime);
             let currentTime = new Date().getTime();
+
             if (slotLocation === blist.location && endTime < currentTime) {
                 firebase.database().ref(`ParkingLocation/${bKey}/slots/${blist.slotNumber - 1}`).update({ booking: false });
             }
@@ -104,7 +96,7 @@ class ViewParking extends Component {
         })
     }
     render() {
-        // console.log("??, this.state.bookingsList ", this.state.bookingsList )
+        // console.log("hahaha, this.state.bookingsList ", this.state.bookingsList )
         return (
             <Grid container>
                 <Grid item xs={3}>
@@ -115,8 +107,7 @@ class ViewParking extends Component {
                         <Divider />
                         <List component="ul"
                         // subheader={<ListSubheader component="div">View Parking Locations</ListSubheader>}
-                        >
-                            {
+                        >{
                                 this.props.p_Lists.map((pList, index) => {
                                     return (
                                         <Fragment key={index} >
@@ -127,9 +118,7 @@ class ViewParking extends Component {
                                                     <IconButton aria-label="View">
                                                         <ViewIcon onClick={() => this.clickView(pList)} />
                                                     </IconButton>
-                                                    <IconButton aria-label="Delete"  >
-                                                        <DeleteIcon onClick={() => this.DeletedLocation(pList)} />
-                                                    </IconButton>
+                                                    
                                                 </ListItemSecondaryAction>
                                             </ListItem>
                                             <Divider />

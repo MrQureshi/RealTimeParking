@@ -5,7 +5,7 @@ import { Grid, Paper } from '@material-ui/core';
 import { TextField, Button } from '@material-ui/core';
 import { FormControl } from '@material-ui/core';
 import { firebaseApp } from '../firebase'
-
+import * as firebase from 'firebase';
 import { Link } from 'react-router-dom';
 
 
@@ -62,9 +62,17 @@ class Form extends Component {
         console.log('this.state', this.state)
         const { userName, email, password } = this.state;
         firebaseApp.auth().createUserWithEmailAndPassword(email, password)
-            // .then(authUser => {
-            //     database.cre
-            // })
+            .then(authUser => {
+                firebase.database().ref().child("users" + "/" + firebase.auth().currentUser.uid).set({
+                    userName: userName,
+                    email: email,
+                    password: password,
+                })
+                .catch(error => {
+                    this.setState({ error })
+                });
+                
+            })
             .catch(error => {
                 this.setState({ error })
             })

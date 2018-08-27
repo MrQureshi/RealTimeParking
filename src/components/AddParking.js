@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { Grid, Paper } from '@material-ui/core';
 import { TextField, Button } from '@material-ui/core';
 import { FormControl } from '@material-ui/core';
-import {ParkingLocationRef} from '../firebase'; 
+import { ParkingLocationRef } from '../firebase';
 
 import { connect } from 'react-redux'
 const styles = {
@@ -19,76 +19,103 @@ const styles = {
     },
 };
 
+
 class AddParking extends Component {
     constructor(props) {
         super(props);
-
         this.state = {
+            
             location: '',
+            numbersSolts: '',
             slots: [],
-            numbersSolts:'',
-            error:{
-                message:''
+            error: {
+                message: ''
             }
         }
     }
-    addParkLocation(){
+    addParkLocation() {
         // console.log("this.state", this.state);
-        const {location, numbersSolts} = this.state;
-        const{ email} = this.props.user;
-        if(numbersSolts){
+        const { location, numbersSolts } = this.state;
+        const { email } = this.props.user;
+        if (numbersSolts) {
             // console.log("Ss", numbersSolts);
             let slots = [];
-            for (var i=0; i< numbersSolts; i++){
-                slots.push({booking: false})
+            for (var i = 0; i < numbersSolts; i++) {
+                slots.push({ booking: false })
             }
             // console.log("AA", slots)
-            ParkingLocationRef.push({email, location,numbersSolts, slots})
+            ParkingLocationRef.push({
+                email,
+                location,
+                numbersSolts,
+                slots
+            }).then(
+                this.setState({
+                    location: '',
+                    numbersSolts: '',
+                })
+            )
+            .catch(
+                error => {
+                    this.setState({ error })
+                }
+                )
         }
-    }   
+    }
+
     render() {
+        const {
+            location,
+            numbersSolts
+        } = this.state;
+
+        const isInvalid =
+            location === '' ||
+            numbersSolts === '';
         // console.log("render Addparking : ", this.props.user)
         return (
             <Grid container>
-            <Grid style={styles.flex} item xs={8}>
-            <Paper style={styles.paper} >
-            <form >
-                <FormControl fullWidth >
-                    <TextField
-                        label="Location"
-                        margin="normal"
-                        onChange={event => this.setState({location: event.target.value})}
-                    /><br />
+                <Grid style={styles.flex} item xs={8}>
+                    <Paper style={styles.paper} >
+                        <form >
+                            <FormControl fullWidth >
+                                <TextField
+                                    label="Location"
+                                    margin="normal"
+                                    onChange={event => this.setState({ location: event.target.value })}
+                                    value={this.state.location}
+                                /><br />
 
-                    <TextField
-                        label="Number of Slots"
-                        margin="normal"
-                        onChange={event => this.setState({numbersSolts: event.target.value})}
-                        type="number"
-                    /><br />
-                    <Button
-                        // type="submit"
-                        color="primary"
-                        variant="raised"
-                        onClick={()=> this.addParkLocation()}
-                         >Add Parking</Button>
-                    <br />
-                </FormControl>
-                {<p>{this.state.error.message}</p>}
-            </form>
-            </Paper>
+                                <TextField
+                                    label="Number of Slots"
+                                    margin="normal"
+                                    onChange={event => this.setState({ numbersSolts: event.target.value })}
+                                    type="number"
+                                    value={this.state.numbersSolts}
+                                /><br />
+                                <Button
+                                    disabled={isInvalid}
+                                    color="primary"
+                                    variant="raised"
+                                    onClick={() => this.addParkLocation()}
+                                >Add Parking</Button>
+                                <br />
+                            </FormControl>
+                            {<p>{this.state.error.message}</p>}
+                        </form>
+                    </Paper>
+                </Grid>
             </Grid>
-        </Grid>
         )
     }
 }
-function mapStateToProps(state){
-    const {user, bookingList } = state;
+function mapStateToProps(state) {
+    const { user, bookingList } = state;
     // console.log("state in Addparking.jsx", state)
-    return{
-        user, 
+    return {
+        user,
     };
 }
 
-export default connect(mapStateToProps, null) (AddParking);
+export default connect(mapStateToProps, null)(AddParking);
 

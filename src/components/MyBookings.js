@@ -7,7 +7,7 @@ import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import { bookingsLists } from '../actions'
+import { MyBookingsList } from '../actions'
 import { connect } from 'react-redux';
 
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
@@ -35,28 +35,45 @@ const styles = {
         overflowY: 'auto'
     },
 };
-class viewParking extends Component {
+class Mybooking extends Component {
     constructor() {
         super()
     }
     DeletedBookings(key){
         console.log(key)
         firebase.database().ref(`Booking/${key}`).remove();
+
     }
     componentDidMount() {
-        firebase.database().ref('Booking').on('value', snap => {
-            let objBookings = snap.val()
-            // console.log("bookings componentDidMount", objBookings)
+        firebase.auth().onAuthStateChanged((user) => {
+            console.log("currentUser.uid", user.email)
 
-            let bookingList = [];
-            for (let key in objBookings) {
-                bookingList.push({ ...objBookings[key], key });
+            if (user) {
+                firebase.database().ref('Booking').on('value', snap => {
+                    if (snap.val()) {
+                        // console.log("mybookings", snap)
+                        console.log("snap.val", snap.val())
+                        let Mybookings = []
+                        Object.values(snap.val()).filter((book) => {
+                            // console.log(book.email === user.email)
+                            return book.email === user.email
+                        }).map((book) => {
+                            // console.log(book)
+                            Mybookings.push(book)
+                        })
+                        console.log("Mybookings", Mybookings)
+
+                        this.props.MyBookingsList(Mybookings);
+                    }
+                    // else {
+                    //     console.log("List is empty")
+                    // }
+                })
             }
-            this.props.bookingsLists(bookingList);
         })
     }
     render() {
-        // console.log("ViewBooking Render", this.props.bookingList)
+        console.log("MyBooking Render", this.props.Mybookings)
         return (
             <Grid container>
                 <Grid item xs={3}></Grid>
@@ -70,35 +87,22 @@ class viewParking extends Component {
                         // subheader={<ListSubheader component="div">View Parking Locations</ListSubheader>}
                         >
                             {
-                                this.props.bookingList.map((bList, index) => {
-                                    let cDate = new Date(bList.endTime);
+                                this.props.Mybookings.map((myList, index) => {
+                                    let cDate = new Date(myList.endTime);
                                     // console.log("cDate", cDate)
-                                    let endTime = cDate.getHours() + ":" + cDate.getMinutes() ;
-                                    // console.log("endTime", endTime)
-                                    
-                                    //
-                                    // bookingHours:1
-                                    // date:"2018-08-07"
-                                    // email:"a@g.com"
-                                    // endTime:1533660000000
-                                    // key:-LJK1_wm_lRMxwxXJ5bM"
-                                    // location:"Kurangi"
-                                    // slotNumber:1
-                                    // startTime:1533656400000
-                                    // time: "20:40"
-                                    //
+                                    let endTime = cDate.getHours() + ":" + cDate.getMinutes();
+
                                     return (
-                                        <Fragment key={index} >
+                                        <Fragment >
                                             <ListItem button >
                                                 {/* <ListItemText primary="abc | xyz" secondary="cbe | efg | ghi | ijk " /> */}
                                                 <ListItemText
-                                                    primary={bList.location + " | " + bList.date} 
-                                                    secondary={" Slot : #"+ bList.slotNumber +" | "+ "Start Time : "+ bList.time +" | "+"End Time : " + endTime }/>
+                                                    primary={myList.location + " | " + myList.date}
+                                                    secondary={" Slot : #" + myList.slotNumber + " | " + "Start Time : " + myList.time + " | " + "End Time" + endTime} />
                                                 <ListItemSecondaryAction>
-
                                                     <IconButton aria-label="Delete"  >
-                                                        <DeleteIcon 
-                                                        onClick={() => this.DeletedBookings(bList.key)} 
+                                                        <DeleteIcon
+                                                            onClick={() => this.DeletedBookings()}
                                                         />
                                                     </IconButton>
                                                 </ListItemSecondaryAction>
@@ -116,11 +120,10 @@ class viewParking extends Component {
     }
 }
 function mapStateToProps(state) {
-    const { bookingList } = state
+    const { Mybookings } = state
     // console.log("mapStateToProps ViewBooking.js", bookingList)
     return {
-        bookingList
+        Mybookings
     }
 }
-
-export default connect(mapStateToProps, { bookingsLists })(viewParking);
+export default connect(mapStateToProps, { MyBookingsList })(Mybooking);
