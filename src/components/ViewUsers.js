@@ -40,6 +40,28 @@ class viewUsers extends Component {
         super()
 
     }
+    deleteUser(key) {
+        console.log(key)
+        var ref = firebase.database().ref("Booking");
+        ref.orderByChild("userKey").equalTo(key).once("value", function(snap){
+            const obj = snap.val();
+            for(let key in obj){
+                ref.child(key).remove()
+            }
+        })
+
+        var refuserFeedback = firebase.database().ref(`userFeedback`).child(key);
+        refuserFeedback.once("value", function (snap) {
+            let obj = snap.val();
+            console.log("obj", obj)
+            for (let key in obj) {
+                refuserFeedback.child(key).remove()
+            }
+        })
+
+        firebase.database().ref(`users/${key}`).remove();
+
+    }
     componentDidMount() {
         firebase.database().ref('users').on('value', snap => {
             let objUsers = snap.val()
@@ -66,26 +88,38 @@ class viewUsers extends Component {
                         // subheader={<ListSubheader component="div">View Parking Locations</ListSubheader>}
                         >
                             {
-                                this.props.usersList.map((uList, index) => {
-                                    // email: "ras@g.com", 
-                                    // password: "123456", 
-                                    // userName: "rasheed", 
-                                    // key: "9R7qXInTrjf4YThnQLLQbc164Jv1"
-                                    return (
-                                        <Fragment key={index} >
-                                            <ListItem button >
-                                                <ListItemText primary={uList.userName} secondary={uList.email} />
-                                                <ListItemSecondaryAction>
-                                                    <IconButton aria-label="Delete"  >
-                                                        <DeleteIcon
-                                                        />
-                                                    </IconButton>
-                                                </ListItemSecondaryAction>
-                                            </ListItem>
-                                            <Divider />
-                                        </Fragment>
-                                    )
-                                })
+                                !this.props.usersList.length ?
+                                    <Fragment>
+                                        < ListItem>
+                                            <ListItemText align="center" primary="No List Found" />
+                                        </ListItem>
+                                    </Fragment>
+                                    :
+                                    this.props.usersList.map((uList, index) => {
+                                        if (uList.email === "admin@gmail.com") {
+                                            return
+                                            // email: "ras@g.com", 
+                                            // password: "123456", 
+                                            // userName: "rasheed", 
+                                            // key: "9R7qXInTrjf4YThnQLLQbc164Jv1"
+                                        }
+                                        else {
+                                            return (
+                                                <Fragment key={index} >
+                                                    <ListItem button >
+                                                        <ListItemText primary={uList.userName} secondary={uList.email} />
+                                                        <ListItemSecondaryAction>
+                                                            <IconButton aria-label="Delete" onClick={() => this.deleteUser(uList.key)}  >
+                                                                <DeleteIcon
+                                                                />
+                                                            </IconButton>
+                                                        </ListItemSecondaryAction>
+                                                    </ListItem>
+                                                    <Divider />
+                                                </Fragment>
+                                            )
+                                        }
+                                    })
                             }
                         </List>
                     </Paper>

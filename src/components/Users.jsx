@@ -61,12 +61,13 @@ class Dashboard extends Component {
 
 
     render() {
+        const { userName } = this.props.user;
         return (
             <Fragment >
                 <AppBar position="static">
                     <Toolbar>
                         <Typography variant="display2" color="inherit" style={styles.flex}  >
-                            user
+                           {userName} 
                         </Typography>
                         <Button
                             color="inherit"
@@ -98,11 +99,10 @@ class Dashboard extends Component {
                     <Grid item xs={12}>
                         {/* <Paper style={styles.paper} > */}
                             {/* {this.state.value === 0 ? <Addparking/> : null} */}
-                            {/* {this.state.value === 0 ? <ViewParking/> : null} */}
-                            {this.state.value === 0 ? <Selecttime/> : null}
+                            {this.state.value === 0 ? <ViewParking/> : null}
+                            {/* {this.state.value === 0 ? <Selecttime/> : null} */}
                             {this.state.value === 1 ? <Mybookings/> : null}
                             {this.state.value === 2 ? <Feedback/> : null}
-                            
                         {/* </Paper> */}
                     </Grid>
                     {/* <Grid item xs={8}>
@@ -117,8 +117,11 @@ class Dashboard extends Component {
     }
 }
 function mapStateToProps(state){
+    const { user } = state;
     console.log('state', state);
-    return{}
+    return{
+        user
+    }
 }
 
 export default connect(mapStateToProps, null)(Dashboard);

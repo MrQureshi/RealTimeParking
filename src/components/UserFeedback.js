@@ -11,6 +11,8 @@ import CardHeader from '@material-ui/core/CardHeader';
 import Divider from '@material-ui/core/Divider';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 import firebase from 'firebase'
 
@@ -28,13 +30,18 @@ const styles = {
         marginTop: 5,
         // marginBottom: 5,
     },
+    typo: {
+        paddingTop: 20,
+    },
+    bgcolor: {
+        backgroundColor: '#e8f5e9',
+    },
 };
 
 class feedBack extends Component {
     constructor(props) {
         super(props);
         this.state = {
-
             feedback: '',
             myFeedback: '',
             error: {
@@ -42,6 +49,13 @@ class feedBack extends Component {
             },
         }
     }
+
+    deletedMyFeedback(selectedFeedback) {
+        // console.log("Delete", selectedFeedback)
+        firebase.database().ref(`userFeedback/${selectedFeedback.userKey}/${selectedFeedback.key}`).remove();
+
+    }
+
     componentDidMount() {
         firebase.auth().onAuthStateChanged((user) => {
             console.log("currentUser.uid", user.email)
@@ -54,9 +68,8 @@ class feedBack extends Component {
                     for (let key in parent) {
                         if (parent[key].email === user.email) {
 
-                            console.log("iffff", parent[key])
-                            myFeedbackList.push(parent[key]);
-
+                            // console.log("iffff", parent[key])
+                            myFeedbackList.push({ ...parent[key], key });
                         }
                     }
                 }
@@ -148,40 +161,61 @@ class feedBack extends Component {
                         </form>
                     </Paper>
                     {
-                        // console.log("this.state.myFeedback", this.state.myFeedback)
-                        this.state.myFeedback.length && this.state.myFeedback.map((myFeeds, index) => {
-                            return (
-                                <Card style={styles.paper} key={index}>
-                                    <CardHeader
-                                        title="Feedbacks"
-                                    // subheader={myFeeds.date}
-                                    >
-                                    </CardHeader>
-                                    <CardContent>
-                                        <Typography component="p">
-                                            {myFeeds.feedback}
-                                        </Typography>
-                                    </CardContent>
-                                    <Divider />
-                                    {
-                                        myFeeds.reply ?
-                                            <CardActions align="right">
-                                                <Fragment >
-                                                    <Typography align="center" variant="headline" component="p">
-                                                        {myFeeds.reply.userName} :
+                        
+                        !this.state.myFeedback.length ?
+                            <Typography style={styles.typo} align="center">
+                                No Feedback Found
+                            </Typography>
+                            :
+                            this.state.myFeedback.length && this.state.myFeedback.map((myFeeds, index) => {
+                                return (
+                                    <Grid container>
+                                        <Grid style={styles.flex} item xs={12}>
+                                            <Card style={styles.paper} key={index}>
+                                                <CardHeader
+                                                    title="Feedbacks"
+                                                // subheader={myFeeds.date}
+                                                >
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <Typography component="p">
+                                                        {myFeeds.feedback}
                                                     </Typography>
-                                                    <Typography align="center" component="p">
-                                                        {myFeeds.reply.adminReply}
-                                                    </Typography>
-                                                </Fragment>
-                                            </CardActions> :
-                                            null
-                                    }
-                                </Card>
-                            )
+                                                </CardContent>
+                                                <CardActions align="right" style={styles.bgcolor}  >
+                                                    <Grid item xs={11}>
+                                                        {
+                                                            myFeeds.reply ?
+                                                                <Fragment>
+                                                                    <Divider />
+                                                                    <CardActions align="right">
+                                                                        <Fragment >
+                                                                            <Typography align="center" variant="headline" component="p">
+                                                                                {myFeeds.reply.userName} :
+                                                                    </Typography>
+                                                                            <Typography align="center" component="p">
+                                                                                {myFeeds.reply.adminReply}
+                                                                            </Typography>
+                                                                        </Fragment>
+                                                                    </CardActions>
+                                                                </Fragment> :
+                                                                null
+                                                        }
+                                                    </Grid>
+                                                    <Grid style={styles.flex} item xs={1}>
+                                                        <IconButton aria-label="Delete">
+                                                            <DeleteIcon
+                                                                onClick={() => this.deletedMyFeedback(myFeeds)}
 
-                        })
-                    }
+                                                            />
+                                                        </IconButton>
+                                                    </Grid>
+                                                </CardActions>
+                                            </Card>
+                                        </Grid>
+                                    </Grid>
+                                )
+                            })}
                 </Grid>
             </Grid>
         )

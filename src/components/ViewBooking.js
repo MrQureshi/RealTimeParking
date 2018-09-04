@@ -70,6 +70,13 @@ class viewParking extends Component {
                         // subheader={<ListSubheader component="div">View Parking Locations</ListSubheader>}
                         >
                             {
+                                !this.props.bookingList.length ?
+                                <Fragment>
+                                    < ListItem>
+                                        <ListItemText align="center" primary="No List Found" />
+                                    </ListItem>
+                                </Fragment>
+                                :
                                 this.props.bookingList.map((bList, index) => {
                                     let cDate = new Date(bList.endTime);
                                     // console.log("cDate", cDate)

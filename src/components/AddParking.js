@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-// import { AppBar, Toolbar, Typography } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 import { Grid, Paper } from '@material-ui/core';
 import { TextField, Button } from '@material-ui/core';
 import { FormControl } from '@material-ui/core';
@@ -24,13 +24,11 @@ class AddParking extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            
+
             location: '',
             numbersSolts: '',
             slots: [],
-            error: {
-                message: ''
-            }
+            error: ""
         }
     }
     addParkLocation() {
@@ -53,13 +51,13 @@ class AddParking extends Component {
                 this.setState({
                     location: '',
                     numbersSolts: '',
+                    error: ''
                 })
-            )
-            .catch(
+                )
+                .catch(
                 error => {
                     this.setState({ error })
-                }
-                )
+                })
         }
     }
 
@@ -85,23 +83,28 @@ class AddParking extends Component {
                                     onChange={event => this.setState({ location: event.target.value })}
                                     value={this.state.location}
                                 /><br />
-
                                 <TextField
                                     label="Number of Slots"
                                     margin="normal"
-                                    onChange={event => this.setState({ numbersSolts: event.target.value })}
+                                    onChange={event => event.target.value <= 0 ? this.setState({ error: "Zero and nagative value will not accept" }) : this.setState({ numbersSolts: event.target.value, error: '' })}
                                     type="number"
+                                    // value={this.state.numbersSolts>=0 ? this.setState({error: "Zero and nagative value will not accept"}) :
                                     value={this.state.numbersSolts}
                                 /><br />
+                                <Typography align="center" component="p" variant="subheading" color="error">
+                                    {this.state.error}
+                                </Typography>
+                                <br />
                                 <Button
                                     disabled={isInvalid}
                                     color="primary"
                                     variant="raised"
                                     onClick={() => this.addParkLocation()}
-                                >Add Parking</Button>
-                                <br />
+                                >
+                                    Add Parking
+                                </Button>
                             </FormControl>
-                            {<p>{this.state.error.message}</p>}
+
                         </form>
                     </Paper>
                 </Grid>

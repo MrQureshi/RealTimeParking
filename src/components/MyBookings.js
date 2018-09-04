@@ -39,7 +39,7 @@ class Mybooking extends Component {
     constructor() {
         super()
     }
-    DeletedBookings(key){
+    DeletedBookings(key) {
         console.log(key)
         firebase.database().ref(`Booking/${key}`).remove();
 
@@ -50,24 +50,38 @@ class Mybooking extends Component {
 
             if (user) {
                 firebase.database().ref('Booking').on('value', snap => {
+
+                    // let objBooking = snap.val();
+                    // let Mybookings = [];
+                    // for (let key in objBooking) {
+                    //     console.log("objBooking[key].email", objBooking[key].email)
+                    //     if (objBooking[key].email === user.email) {
+                    //         Mybookings.push({ ...objBooking[key], key })
+                    //     }
+                    //     this.props.MyBookingsList(Mybookings);
+                    // }
+
                     if (snap.val()) {
                         // console.log("mybookings", snap)
                         console.log("snap.val", snap.val())
+                        let keys = Object.keys(snap.val())
                         let Mybookings = []
                         Object.values(snap.val()).filter((book) => {
-                            // console.log(book.email === user.email)
+                            console.log("?", book)
                             return book.email === user.email
-                        }).map((book) => {
+                        }).map((book, index) => {
                             // console.log(book)
-                            Mybookings.push(book)
+                            let obj = { ...book, index: keys[index] }
+                            Mybookings.push(obj)
                         })
                         console.log("Mybookings", Mybookings)
 
                         this.props.MyBookingsList(Mybookings);
                     }
-                    // else {
-                    //     console.log("List is empty")
-                    // }
+                    else {
+                        console.log("List is empty")
+                        this.props.MyBookingsList([]);
+                    }
                 })
             }
         })
@@ -87,10 +101,22 @@ class Mybooking extends Component {
                         // subheader={<ListSubheader component="div">View Parking Locations</ListSubheader>}
                         >
                             {
+                                !this.props.Mybookings.length ?
+                                <Fragment>
+                                    < ListItem>
+                                        <ListItemText align="center" primary="No List Found" />
+                                    </ListItem>
+                                </Fragment>
+                                :
                                 this.props.Mybookings.map((myList, index) => {
                                     let cDate = new Date(myList.endTime);
-                                    // console.log("cDate", cDate)
-                                    let endTime = cDate.getHours() + ":" + cDate.getMinutes();
+                                    console.log("myList.key", myList)
+                                    let mint = cDate.getMinutes();
+                                    if(mint < 10){
+                                        mint ='0'+mint
+                                    }
+                                    let hour = cDate.getHours();
+                                    let endTime = hour + ":" + mint;
 
                                     return (
                                         <Fragment >
@@ -102,7 +128,7 @@ class Mybooking extends Component {
                                                 <ListItemSecondaryAction>
                                                     <IconButton aria-label="Delete"  >
                                                         <DeleteIcon
-                                                            onClick={() => this.DeletedBookings()}
+                                                            onClick={() => this.DeletedBookings(myList.index)}
                                                         />
                                                     </IconButton>
                                                 </ListItemSecondaryAction>

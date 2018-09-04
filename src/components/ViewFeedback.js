@@ -40,7 +40,9 @@ const styles = {
         marginTop: 15,
         // marginBottom: 5,
     },
-   
+    typo: {
+        paddingTop: 20,
+    },
     bgcolor: {
         backgroundColor: '#e8f5e9',
       },
@@ -81,6 +83,11 @@ class ViewFeedback extends Component {
                 <Grid style={styles.flex} item xs={1}></Grid>
                 <Grid style={styles.flex} item xs={10}>
                     {
+                        !this.props.feedbackList.length?
+                        <Typography style={styles.typo} align="center">
+                            No Feedback Found
+                        </Typography>
+                        :
                         this.props.feedbackList.map((fdList, index) => {
                             // date:"August,24,2018"
                             // email:"ras@g.com"

@@ -51,14 +51,16 @@ class ViewParking extends Component {
     }
 
     DeletedLocation(bookSlots) {
-        // console.log("kk", key);
+        // console.log(bookSlots.key)
+        var ref = firebase.database().ref("Booking");
+        ref.orderByChild("locationKey").equalTo(bookSlots.key).once("value", function(snap){
+            const obj = snap.val();
+            for(let key in obj){
+                ref.child(key).remove()
+            }
+        })
+
         firebase.database().ref(`ParkingLocation/${bookSlots.key}`).remove();
-        // console.log("this.props.bookingSlots(bookSlots)", this.props.bookingSlots(bookSlots));
-        // delete this.props.bookingSlots(bookSlots);
-        // // console.log('chal rha hai')
-        // // window.location.reload();
-        // // this.state.slots= []
-        // return this.props.bookingSlots
     }
     clickView(bookSlots) {
         this.props.bookingSlots(bookSlots);
@@ -107,7 +109,8 @@ class ViewParking extends Component {
         // console.log("??, this.state.bookingsList ", this.state.bookingsList )
         return (
             <Grid container>
-                <Grid item xs={3}>
+                <Grid item xs={4}></Grid>
+                <Grid item xs={4}>
                     <Paper style={styles.paper} >
                         <Typography variant="headline" gutterBottom align="center">
                             Parking Locations
@@ -117,34 +120,59 @@ class ViewParking extends Component {
                         // subheader={<ListSubheader component="div">View Parking Locations</ListSubheader>}
                         >
                             {
-                                this.props.p_Lists.map((pList, index) => {
-                                    return (
-                                        <Fragment key={index} >
-                                            < ListItem button >
-                                                <ListItemText primary={pList.location} secondary={"Slots " + pList.numbersSolts} />
-                                                {/* <ListItemText primary={pList.numbersSolts} /> */}
-                                                <ListItemSecondaryAction>
-                                                    <IconButton aria-label="View">
+                                !this.props.p_Lists.length ?
+                                    <Fragment >
+                                        < ListItem>
+                                            <ListItemText align="center" primary="No list Found" />
+                                        </ListItem>
+                                    </Fragment>
+                                    :
+                                    this.props.p_Lists.map((pList, index) => {
+                                        return (
+                                            <Fragment key={index} >
+                                                < ListItem button >
+                                                    <ListItemText primary={pList.location} secondary={"Slots " + pList.numbersSolts} />
+                                                    {/* <ListItemText primary={pList.numbersSolts} /> */}
+                                                    <ListItemSecondaryAction>
+                                                        {/* <IconButton aria-label="View">
                                                         <ViewIcon onClick={() => this.clickView(pList)} />
-                                                    </IconButton>
-                                                    <IconButton aria-label="Delete"  >
-                                                        <DeleteIcon onClick={() => this.DeletedLocation(pList)} />
-                                                    </IconButton>
-                                                </ListItemSecondaryAction>
-                                            </ListItem>
-                                            <Divider />
-                                        </Fragment>
+                                                        </IconButton> */}
+                                                        <IconButton aria-label="Delete"  >
+                                                            <DeleteIcon onClick={() => this.DeletedLocation(pList)} />
+                                                        </IconButton>
+                                                    </ListItemSecondaryAction>
+                                                </ListItem>
+                                                <Divider />
+                                            </Fragment>
+                                        )
+
+                                        // if (!pList) {
+                                        //     return (
+                                        //         <Fragment>
+                                        //             < ListItem button>
+                                        //                 <ListItemText primary="No list Found" />
+                                        //             </ListItem>
+                                        //         </Fragment>
+                                        //     )
+
+
+                                        // }
+                                        // else {
+                                        // }
+
+                                    }
                                     )
-                                })
+
                             }
                         </List>
                     </Paper>
                 </Grid>
-                <Grid item xs={9}>
+                {/* <Grid item xs={9}>
                     <Paper style={styles.paper} >
                         <Slots />
+                        
                     </Paper>
-                </Grid>
+                </Grid> */}
             </Grid>
         )
     }

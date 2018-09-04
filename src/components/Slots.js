@@ -95,13 +95,9 @@ class Slots extends Component {
         this.setState({ controlledDate: event.target.value })
         // console.log("Done");
     }
-
     handelTimePicker = (event) => {
-
         // console.log("getTimePicker");
         this.setState({ Time: event.target.value })
-
-
     }
 
     handleTime = (event) => {
@@ -119,7 +115,6 @@ class Slots extends Component {
             error: null
         })
     }
-
     bookingSlot() {
         const { email } = this.props.user;
         const { location, key } = this.props.bookSlots;
@@ -229,23 +224,10 @@ class Slots extends Component {
                 this.setState(error)
             });
         }
-        //__________
-        // }
     }
-    // click = (index) => {
-    //     console.log("click", this.state.controlledDate);
-
-    //     console.log("1", index)
-    //     console.log("2", this.props.bookSlots)
-    //     this.props.bookSlots((key) => {
-    // console.log("click", key)
-    //     })
-    // }
+    
     render() {
-        // console.log("Render___this.props.user.email", this.props.user )
         const { open, error } = this.state;
-        // console.log("zxzxzx this.state.bookingsList", this.state.bookingsList)
-        // console.log("render zxzxzx", this.props.bookSlots.location)
         return (
             <Fragment>
                 <Typography variant="display2" gutterBottom align="center">
@@ -256,13 +238,11 @@ class Slots extends Component {
                 {
                     //console.log("Slots + bookSlots", this.props.bookSlots.slots)
                     this.state.bool ? this.state.slots.map((slt, index) => {
-
                         return <Button onClick={() => {
                             // this.handletoggle(index + 1);
                             this.setState({ index: index + 1 });
                             // this.click(index)
                         }} style={{ margin: 10 }} variant="contained" color={slt.booking ? 'secondary' : "primary"} key={index}>slot {index + 1}</Button>
-
                     }) : null
                 }
                 <Dialog
@@ -316,7 +296,6 @@ class Slots extends Component {
                                 {error}
                             </Typography>
                             <br />
-
                             <Button
                                 variant="raised"
                                 color="primary"
